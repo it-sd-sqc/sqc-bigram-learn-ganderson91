@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.text.MessageFormat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,4 +62,24 @@ class MainTest {
   }
 
   // TODO: Create your test(s) below. /////////////////////////////////////////
+
+  @Test
+  void getId() {
+    String aWord = "you're";
+    Connection db = Main.createConnection();
+    assertDoesNotThrow(
+      () -> {
+        Statement command = db.createStatement();
+        String query = MessageFormat.format("""
+      INSERT INTO words (string)
+        SELECT ''{0}'' WHERE NOT EXISTS (
+          SELECT string FROM words WHERE string = ''{0}''
+        )
+      """, aWord);
+        assertDoesNotThrow(
+          () -> {command.execute(query);}
+        );
+      }
+    );
+  }
 }
